@@ -25,7 +25,7 @@ const MODEL_MAPPING = {
   'gpt-3.5-turbo': 'nvidia/llama-3.1-nemotron-ultra-253b-v1',
   'gpt-4': 'qwen/qwen3-coder-480b-a35b-instruct',
   'gpt-4-turbo': 'z-ai/glm-4.7',
-  'gpt-4o': 'z-ai/glm4.7',
+  'gpt-4o': 'z-ai/glm4.7,
   'claude-3-opus': 'openai/gpt-oss-120b',
   'claude-3-sonnet': 'openai/gpt-oss-20b',
   'gemini-pro': 'qwen/qwen3-next-80b-a3b-thinking' 
@@ -97,7 +97,7 @@ app.post('/v1/chat/completions', async (req, res) => {
       messages: messages,
       temperature: temperature || 0.6,
       max_tokens: max_tokens || 9024,
-      ...(ENABLE_THINKING_MODE ? { chat_template_kwargs: { thinking: true } } : {}),
+      extra_body: ENABLE_THINKING_MODE ? { chat_template_kwargs: { thinking: true } } : undefined,
       stream: stream || false
     };
     
@@ -160,7 +160,7 @@ app.post('/v1/chat/completions', async (req, res) => {
                   }
                 } else {
                   if (content) {
-                    data.choices[0].delta.content = content.replace(/\\n/g, '\n');
+                    data.choices[0].delta.content = content;
                   } else {
                     data.choices[0].delta.content = '';
                   }
@@ -188,7 +188,7 @@ app.post('/v1/chat/completions', async (req, res) => {
         created: Math.floor(Date.now() / 1000),
         model: model,
         choices: response.data.choices.map(choice => {
-          let fullContent = (choice.message?.content || '').replace(/\\n/g, '\n');
+          let fullContent = choice.message?.content || '';
           
           if (SHOW_REASONING && choice.message?.reasoning_content) {
             fullContent = '<think>\\n' + choice.message.reasoning_content + '\\n</think>\\n\\n' + fullContent;
