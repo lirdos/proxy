@@ -160,7 +160,7 @@ app.post('/v1/chat/completions', async (req, res) => {
                   }
                 } else {
                   if (content) {
-                    data.choices[0].delta.content = content;
+                    data.choices[0].delta.content = content.replace(/\\n/g, '\n');
                   } else {
                     data.choices[0].delta.content = '';
                   }
@@ -188,7 +188,7 @@ app.post('/v1/chat/completions', async (req, res) => {
         created: Math.floor(Date.now() / 1000),
         model: model,
         choices: response.data.choices.map(choice => {
-          let fullContent = choice.message?.content || '';
+          let fullContent = (choice.message?.content || '').replace(/\\n/g, '\n');
           
           if (SHOW_REASONING && choice.message?.reasoning_content) {
             fullContent = '<think>\\n' + choice.message.reasoning_content + '\\n</think>\\n\\n' + fullContent;
